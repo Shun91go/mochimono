@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>持ち物チェッカー</title>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#fff6f9;--card:#fff;--ink:#2b1620;--sub:#8a6a78;--acc:#d81b60;--onacc:#fff;--accs:#fde0ea;--line:#f2d3de;--nav:#d81b60;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){color-scheme:dark;--bg:#1b1015;--card:#26171e;--ink:#f6e7ed;--sub:#c3a1af;--acc:#ff5c93;--onacc:#2b1620;--accs:#4a2133;--line:#3c2530;--nav:#3a1a28}}
+:root[data-theme="dark"]{color-scheme:dark;--bg:#1b1015;--card:#26171e;--ink:#f6e7ed;--sub:#c3a1af;--acc:#ff5c93;--onacc:#2b1620;--accs:#4a2133;--line:#3c2530;--nav:#3a1a28}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Zen Maru Gothic",system-ui,"Hiragino Maru Gothic ProN","Hiragino Sans",sans-serif;line-height:1.6}
+main{max-width:560px;margin:0 auto;padding:18px 16px 110px}
+h1{font-size:24px;margin:6px 0 2px}
+h2{font-size:17px;margin:0 0 10px}
+.sub{color:var(--sub);font-size:13px;margin:0 0 16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:14px 16px;margin:0 0 14px}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 14px}
+button{font:inherit;color:inherit;cursor:pointer}
+.chip{border:1px solid var(--line);background:var(--card);border-radius:999px;padding:8px 16px}
+.chip.on{background:var(--acc);color:var(--onacc);border-color:var(--acc);font-weight:700}
+.btn{display:block;width:100%;border:0;border-radius:14px;padding:12px;background:var(--acc);color:var(--onacc);font-weight:700;text-align:center;text-decoration:none;margin-top:10px}
+.btn.ghost{background:var(--accs);color:var(--acc)}
+.btn.warn{background:transparent;color:var(--sub);border:1px solid var(--line)}
+.bar{height:10px;border-radius:99px;background:var(--accs);overflow:hidden;margin-top:8px}
+.bar i{display:block;height:100%;background:var(--acc);border-radius:99px}
+.row{display:flex;align-items:center;gap:12px;padding:12px 0;border-top:1px solid var(--line);width:100%;background:none;border-left:0;border-right:0;border-bottom:0;text-align:left}
+.row:first-child{border-top:0}
+.box{flex:none;width:26px;height:26px;border-radius:50%;border:2px solid var(--line);display:grid;place-items:center;color:var(--onacc);font-size:14px}
+.done .box{background:var(--acc);border-color:var(--acc)}
+.done .nm{text-decoration:line-through;color:var(--sub)}
+.grow{flex:1;min-width:0}
+.sm{font-size:12px;color:var(--sub)}
+.tag{display:inline-block;font-size:11px;padding:1px 8px;border-radius:99px;background:var(--accs);color:var(--acc);margin-left:6px}
+.no{flex:none;width:30px;height:30px;border-radius:50%;background:var(--accs);color:var(--acc);display:grid;place-items:center;font-weight:700}
+.empty{color:var(--sub)}
+label{display:block;font-size:13px;color:var(--sub);margin:10px 0 0}
+input,select,textarea{display:block;width:100%;font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-top:4px}
+textarea{min-height:92px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:0 10px}
+.prow{display:flex;align-items:center;gap:8px;margin-top:8px}
+.prow input{margin:0}
+.prow b{flex:none;width:36px}
+.note{font-size:12px;color:var(--sub);margin:10px 0 0}
+a.lnk{display:flex;justify-content:space-between;gap:10px;padding:11px 0;border-top:1px solid var(--line);color:var(--ink);text-decoration:none}
+a.lnk span:last-child{color:var(--acc);flex:none;font-weight:700}
+.nav{position:fixed;left:0;right:0;bottom:0;display:flex;justify-content:space-around;background:var(--nav);padding:8px 8px calc(8px + env(safe-area-inset-bottom,0px));border-radius:22px 22px 0 0}
+.nav button{background:none;border:0;color:#fff;opacity:.7;padding:8px 14px;border-radius:14px;font-size:13px}
+.nav button.on{opacity:1;background:rgba(255,255,255,.22);font-weight:700}
+#modal{position:fixed;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:flex-end;justify-content:center;z-index:20}
+#modal[hidden]{display:none}
+.sheet{background:var(--card);width:100%;max-width:560px;max-height:92%;overflow:auto;border-radius:24px 24px 0 0;padding:18px 16px calc(18px + env(safe-area-inset-bottom,0px))}
+.err{color:#d32f2f;font-size:13px;margin:8px 0 0}
+#toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:9px 16px;border-radius:99px;font-size:13px;z-index:30}
+#toast[hidden]{display:none}
+</style>
+</head>
+<body>
+<main id="app"></main>
+<div id="modal" hidden></div>
+<div id="toast" hidden></div>
+<nav class="nav">
+<button data-tab="items">持ち物</button><button data-tab="tt">時間割</button><button data-tab="co">教科</button><button data-tab="set">設定</button>
+</nav>
+<script>
+const D=["日","月","火","水","木","金","土"],KEY="mochimono-v2",WX={sun:"晴れ",cloud:"曇り",rain:"雨"};
+const $=s=>document.querySelector(s);
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const pad=n=>String(n).padStart(2,"0");
+const iso=d=>d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate());
+const pd=s=>{const a=s.split("-").map(Number);return new Date(a[0],a[1]-1,a[2])};
+const tm=t=>{const a=t.split(":").map(Number);return a[0]*60+a[1]};
+const ft=m=>pad(Math.floor(m/60)%24)+":"+pad(m%60);
+function gen(s,len,br,n){const o=[];let t=tm(s);for(let i=0;i<n;i++){o.push({s:ft(t),e:ft(t+len)});t+=len+br}return o}
+function def(){const t=new Date();return{uni:"",periods:gen("09:00",90,10,5),courses:[],rules:{rain:"折りたたみ傘, タオル",sun:"水筒",cloud:"羽織りもの"},wx:"",start:iso(t),end:iso(new Date(t.getFullYear(),t.getMonth()+3,t.getDate())),eve:true,evT:"21:00",chk:{}}}
+function load(){try{const j=JSON.parse(localStorage.getItem(KEY));if(j&&Array.isArray(j.courses))return Object.assign(def(),j)}catch(e){}return def()}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+let S=load(),tab="items",dd=0,vd=(()=>{const w=new Date().getDay();return w===0?1:w})(),editing="";
+function toast(m){const t=$("#toast");t.textContent=m;t.hidden=false;clearTimeout(toast.t);toast.t=setTimeout(()=>t.hidden=true,2200)}
+function dayItems(w,wx){const m=new Map();
+ S.courses.filter(c=>c.day===w).sort((a,b)=>a.period-b.period).forEach(c=>c.items.forEach(i=>{const e=m.get(i.n)||{n:i.n,m:false,src:[]};e.m=e.m||i.m;e.src.push(c.name);m.set(i.n,e)}));
+ if(wx&&S.rules[wx])S.rules[wx].split(/[,、\n]/).map(x=>x.trim()).filter(Boolean).forEach(n=>{if(!m.has(n))m.set(n,{n,m:false,src:[WX[wx]]})});
+ return[...m.values()].sort((a,b)=>b.m-a.m)}
+function vItems(){
+ const dt=new Date();dt.setDate(dt.getDate()+dd);const k=iso(dt),list=dayItems(dt.getDay(),S.wx),ck=S.chk[k]||[];
+ const n=list.filter(i=>ck.includes(i.n)).length,cls=S.courses.filter(c=>c.day===dt.getDay()).sort((a,b)=>a.period-b.period);
+ let h=`<h1>持ち物チェッカー</h1><p class="sub">${esc(S.uni||"大学名は設定で登録できます")}</p>
+<div class="chips">${["今日","明日"].map((t,i)=>`<button class="chip${dd===i?" on":""}" data-act="day" data-v="${i}">${t}</button>`).join("")}<span style="flex:1"></span>${Object.keys(WX).map(x=>`<button class="chip${S.wx===x?" on":""}" data-act="wx" data-v="${x}">${WX[x]}</button>`).join("")}</div>`;
+ if(!S.courses.length)return h+`<div class="card"><h2>まず教科を登録しましょう</h2><p class="sub">教科・教室・曜日・時限・持ち物を入れると、ここに毎日の持ち物が出ます。</p><button class="btn" data-act="add" data-day="1" data-per="1">教科を追加する</button><button class="btn ghost" data-tab="set">大学の時限を設定する</button></div>`;
+ h+=`<div class="card"><h2>${D[dt.getDay()]}曜日 ${list.length?n+" / "+list.length+" 準備完了":""}</h2><div class="sm">${cls.length?cls.map(c=>c.period+"限 "+esc(c.name)).join(" / "):"授業はありません"}</div><div class="bar"><i style="width:${list.length?Math.round(n/list.length*100):0}%"></i></div></div>`;
+ h+=`<div class="card">`+(list.length?list.map(i=>`<button class="row${ck.includes(i.n)?" done":""}" data-act="chk" data-k="${esc(i.n)}"><span class="box">${ck.includes(i.n)?"✓":""}</span><span class="grow"><span class="nm">${esc(i.n)}</span>${i.m?'<span class="tag">必須</span>':""}<div class="sm">${esc(i.src.join("・"))}</div></span></button>`).join(""):`<p class="empty">この日の持ち物はありません。</p>`)+`</div>`;
+ return h}
+function vTT(){
+ let h=`<h1>時間割</h1><p class="sub">マスをタップして教科を登録・編集します。</p><div class="chips">${[1,2,3,4,5,6].map(w=>`<button class="chip${vd===w?" on":""}" data-act="vd" data-v="${w}">${D[w]}</button>`).join("")}</div><div class="card">`;
+ h+=S.periods.map((p,i)=>{const c=S.courses.find(x=>x.day===vd&&x.period===i+1);
+  return`<button class="row" ${c?`data-act="edit" data-id="${c.id}"`:`data-act="add" data-day="${vd}" data-per="${i+1}"`}><span class="no">${i+1}</span><span class="grow">${c?`<b>${esc(c.name)}</b><div class="sm">${esc(c.room||"教室未設定")}・${p.s}〜${p.e}</div>`:`<span class="empty">空きコマ</span><div class="sm">${p.s}〜${p.e} タップして追加</div>`}</span>${c?`<span class="sm">${c.items.length}点</span>`:""}</button>`}).join("");
+ return h+`</div>`}
+function vCo(){
+ const cs=S.courses.slice().sort((a,b)=>a.day-b.day||a.period-b.period);
+ return`<h1>教科・持ち物</h1><p class="sub">登録した教科は時間割と持ち物リストに反映されます。</p><div class="card">`+(cs.length?cs.map(c=>`<button class="row" data-act="edit" data-id="${c.id}"><span class="no">${D[c.day]}</span><span class="grow"><b>${esc(c.name)}</b><div class="sm">${c.period}限・${esc(c.room||"教室未設定")}・持ち物${c.items.length}点</div></span></button>`).join(""):`<p class="empty">まだ教科がありません。</p>`)+`</div><button class="btn" data-act="add" data-day="1" data-per="1">教科を追加</button>`}
+function nextDow(d,w){const r=new Date(d);r.setDate(r.getDate()+((w-r.getDay()+7)%7));return r}
+function gcal(title,d,s,e,n,det,loc){const ds=iso(d).replace(/-/g,""),f=m=>ft(m).replace(":","")+"00";
+ return"https://calendar.google.com/calendar/render?action=TEMPLATE&text="+encodeURIComponent(title)+"&dates="+ds+"T"+f(s)+"/"+ds+"T"+f(e)+"&ctz=Asia%2FTokyo&details="+encodeURIComponent(det)+"&location="+encodeURIComponent(loc||"")+"&recur="+encodeURIComponent("RRULE:FREQ=WEEKLY;COUNT="+n)}
+function calLinks(){const st=pd(S.start),en=pd(S.end),out=[];if(isNaN(st)||isNaN(en))return out;
+ const cnt=f=>Math.floor((en-f)/6048e5)+1;
+ S.courses.slice().sort((a,b)=>a.day-b.day||a.period-b.period).forEach(c=>{const p=S.periods[c.period-1],f=nextDow(st,c.day);if(!p||f>en)return;
+  out.push({l:`${D[c.day]}曜${c.period}限 ${c.name}`,u:gcal(c.name,f,tm(p.s),tm(p.e),cnt(f),c.items.length?"持ち物:"+c.items.map(i=>(i.m?"【必須】":"")+i.n).join("、"):"持ち物なし",c.room)})});
+ if(S.eve)[1,2,3,4,5,6].forEach(w=>{const it=dayItems(w,"");if(!it.length)return;const f=nextDow(st,(w+6)%7);if(f>en)return;
+  out.push({l:`${D[(w+6)%7]}曜の夜:明日(${D[w]})の持ち物`,u:gcal("明日の持ち物("+D[w]+"曜)",f,tm(S.evT),tm(S.evT)+15,cnt(f),it.map(i=>(i.m?"【必須】":"")+i.n+"("+i.src.join("・")+")").join("\n"),"")})});
+ return out}
+function vSet(){const P=S.periods,L=calLinks();
+ const code=btoa(unescape(encodeURIComponent(JSON.stringify(Object.assign({},S,{chk:{}})))));
+ return`<h1>設定</h1><p class="sub">この設定はあなたのスマホだけに保存されます。友達にはこのページのURLを送れば、それぞれ自分用に設定できます。</p>
+<div class="card"><h2>大学と時限</h2><label>大学名<input data-f="uni" value="${esc(S.uni)}" placeholder="例:○○大学"></label>
+<div class="grid"><label>1限の開始<input type="time" id="g-s" value="${P[0]?P[0].s:"09:00"}"></label><label>授業の長さ(分)<input type="number" id="g-l" value="${P[0]?tm(P[0].e)-tm(P[0].s):90}"></label><label>休み時間(分)<input type="number" id="g-b" value="${P.length>1?tm(P[1].s)-tm(P[0].e):10}"></label><label>時限の数<input type="number" id="g-n" min="1" max="8" value="${P.length}"></label></div>
+<button class="btn ghost" data-act="gen">この条件で時限を作り直す</button>
+${P.map((p,i)=>`<div class="prow"><b>${i+1}限</b><input type="time" data-p="${i}" data-k="s" value="${p.s}"><span>〜</span><input type="time" data-p="${i}" data-k="e" value="${p.e}"></div>`).join("")}
+<p class="note">昼休みなどで時刻が不規則な大学は、上の時刻を直接直してください。</p></div>
+<div class="card"><h2>天気で増える持ち物</h2>${Object.keys(WX).map(x=>`<label>${WX[x]}の日<input data-r="${x}" value="${esc(S.rules[x]||"")}" placeholder="カンマ区切り"></label>`).join("")}</div>
+<div class="card"><h2>スマホのカレンダーに通知を入れる</h2><p class="sub" style="margin-bottom:6px">Googleカレンダーに毎週の予定として追加します。授業前の通知と、前日夜の持ち物通知になります。</p>
+<div class="grid"><label>学期の開始日<input type="date" data-f="start" value="${S.start}"></label><label>学期の終了日<input type="date" data-f="end" value="${S.end}"></label></div>
+<label style="display:flex;gap:8px;align-items:center"><input type="checkbox" data-c="eve" style="width:auto;margin:0" ${S.eve?"checked":""}>前日の夜に持ち物を通知する</label>
+<label>夜の通知時刻<input type="time" data-f="evT" value="${S.evT}"></label>
+<div style="margin-top:10px">${L.length?L.map(x=>`<a class="lnk" href="${x.u}" target="_blank" rel="noopener noreferrer"><span>${esc(x.l)}</span><span>追加</span></a>`).join(""):`<p class="empty">教科を登録すると、ここに追加ボタンが並びます。</p>`}</div>
+<p class="note">通知の時間は、Googleカレンダーの設定でカレンダーごとの既定の通知(例:30分前)を決めると、追加した予定にそのまま付きます。</p></div>
+<div class="card"><h2>設定のバックアップ・引っ越し</h2><label>設定コード(別のスマホで貼り付けて使えます)<textarea id="code" readonly>${code}</textarea></label><button class="btn ghost" data-act="copy">コードをコピー</button>
+<label>コードを読み込む<textarea id="imp" placeholder="ここに貼り付け"></textarea></label><button class="btn ghost" data-act="imp">読み込む</button><button class="btn warn" data-act="reset">全部消して最初からにする</button></div>`}
+function render(){const y=scrollY;document.querySelectorAll(".nav button").forEach(b=>b.classList.toggle("on",b.dataset.tab===tab));$("#app").innerHTML={items:vItems,tt:vTT,co:vCo,set:vSet}[tab]();scrollTo(0,y)}
+function openEdit(id,day,per){editing=id||"";const c=id?S.courses.find(x=>x.id===id):{name:"",room:"",day,period:per,items:[]};
+ const opt=(a,v)=>a.map(x=>`<option value="${x[0]}"${x[0]==v?" selected":""}>${x[1]}</option>`).join("");
+ $("#modal").innerHTML=`<div class="sheet"><h2>${id?"教科を編集":"教科を追加"}</h2><label>教科名<input id="f-name" value="${esc(c.name)}" placeholder="例:会計論"></label><label>教室<input id="f-room" value="${esc(c.room)}" placeholder="例:204教室"></label>
+<div class="grid"><label>曜日<select id="f-day">${opt([1,2,3,4,5,6].map(w=>[w,D[w]+"曜"]),c.day)}</select></label><label>時限<select id="f-per">${opt(S.periods.map((p,i)=>[i+1,(i+1)+"限 "+p.s]),c.period)}</select></label></div>
+<label>持ち物(1行に1つ。必須の物は行の先頭に ! を付ける)<textarea id="f-items" placeholder="!電卓&#10;教科書&#10;ノート">${esc(c.items.map(i=>(i.m?"!":"")+i.n).join("\n"))}</textarea></label><div class="err" id="err"></div>
+<button class="btn" data-act="save">保存</button>${id?'<button class="btn warn" data-act="del">この教科を削除</button>':""}<button class="btn warn" data-act="close">閉じる</button></div>`;$("#modal").hidden=false}
+function closeM(){$("#modal").hidden=true}
+function saveCourse(){const g=i=>$("#"+i).value,name=g("f-name").trim(),err=m=>$("#err").textContent=m;if(!name)return err("教科名を入力してください。");
+ const day=+g("f-day"),period=+g("f-per"),dup=S.courses.find(c=>c.day===day&&c.period===period&&c.id!==editing);if(dup)return err(`${D[day]}曜${period}限にはすでに「${dup.name}」があります。`);
+ const items=g("f-items").split("\n").map(s=>s.trim()).filter(Boolean).map(s=>({n:s.replace(/^[!！]\s*/,""),m:/^[!！]/.test(s)})).filter(i=>i.n);
+ const c={id:editing||"c"+Date.now(),name,room:g("f-room").trim(),day,period,items};
+ if(editing)S.courses[S.courses.findIndex(x=>x.id===editing)]=c;else S.courses.push(c);save();closeM();render()}
+document.addEventListener("click",e=>{const t=e.target.closest("[data-act],[data-tab]");if(!t)return;const d=t.dataset;
+ if(d.tab){tab=d.tab;render();scrollTo(0,0);return}
+ switch(d.act){
+ case"day":dd=+d.v;render();break;
+ case"wx":S.wx=S.wx===d.v?"":d.v;save();render();break;
+ case"vd":vd=+d.v;render();break;
+ case"chk":{const dt=new Date();dt.setDate(dt.getDate()+dd);const k=iso(dt),a=S.chk[k]||[],i=a.indexOf(d.k);i<0?a.push(d.k):a.splice(i,1);S.chk[k]=a;save();render();break}
+ case"add":openEdit("",+d.day,+d.per);break;
+ case"edit":openEdit(d.id);break;
+ case"save":saveCourse();break;
+ case"del":S.courses=S.courses.filter(c=>c.id!==editing);save();closeM();render();break;
+ case"close":closeM();break;
+ case"gen":{const n=Math.min(8,Math.max(1,+$("#g-n").value||5));S.periods=gen($("#g-s").value||"09:00",+$("#g-l").value||90,+$("#g-b").value||0,n);save();render();toast("時限を作り直しました");break}
+ case"copy":{const c=$("#code");c.select();let ok=false;try{ok=document.execCommand("copy")}catch(x){}if(!ok&&navigator.clipboard)navigator.clipboard.writeText(c.value).then(()=>toast("コピーしました"),()=>toast("長押しでコピーしてください"));else toast(ok?"コピーしました":"長押しでコピーしてください");break}
+ case"imp":try{const j=JSON.parse(decodeURIComponent(escape(atob($("#imp").value.trim()))));if(!Array.isArray(j.courses)||!Array.isArray(j.periods))throw 0;S=Object.assign(def(),j);save();render();toast("読み込みました")}catch(x){toast("コードが正しくありません")}break;
+ case"reset":if(confirm("登録した教科や設定をすべて消します。よろしいですか?")){S=def();save();render()}break}});
+document.addEventListener("change",e=>{const t=e.target;
+ if(t.dataset.f){S[t.dataset.f]=t.value;save();if(t.dataset.f!=="uni")render()}
+ else if(t.dataset.c){S[t.dataset.c]=t.checked;save();render()}
+ else if(t.dataset.r){S.rules[t.dataset.r]=t.value;save()}
+ else if(t.dataset.p!==undefined){S.periods[+t.dataset.p][t.dataset.k]=t.value;save();render()}});
+$("#modal").addEventListener("click",e=>{if(e.target.id==="modal")closeM()});
+render();
+</script>
+</body>
+</html>
